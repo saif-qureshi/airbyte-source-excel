@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "source-excel-sheets"
+version = "0.1.0"
+description = "Source implementation for Excel Sheets."
+authors = ["Airbyte <contact@airbyte.io>"]
+readme = "README.md"
+packages = [{include = "source_excel_sheets"}]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.12"
+airbyte-cdk = "^6.61"
+office365-rest-python-client = "^2.5.11"
+msal = "^1.31.0"
+
+[tool.poetry.group.dev.dependencies]
+requests-mock = "^1.12.1"
+pytest-mock = "^3.14.0"
+pytest = "^8"
+
+[tool.poetry.scripts]
+source-excel-sheets = "source_excel_sheets.run:run"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

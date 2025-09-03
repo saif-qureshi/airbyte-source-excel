@@ -1,0 +1,87 @@
+{
+  "sourceDefinitionId": "9211b2b4-c159-4605-82ae-0a5173b42517",
+  "name": "Excel Sheets",
+  "dockerRepository": "airbyte/source-excel-sheets",
+  "dockerImageTag": "0.1.0",
+  "documentationUrl": "https://docs.airbyte.com/integrations/sources/excel-sheets",
+  "icon": "icon.svg",
+  "sourceType": "file",
+  "spec": {
+    "documentationUrl": "https://docs.airbyte.com/integrations/sources/excel-sheets",
+    "connectionSpecification": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Excel Sheets Source Spec",
+      "type": "object",
+      "required": ["workbook_path", "credentials"],
+      "additionalProperties": true,
+      "properties": {
+        "workbook_path": {
+          "type": "string",
+          "title": "Workbook Path",
+          "description": "Path to the Excel workbook file in your OneDrive/SharePoint",
+          "examples": ["/Orders.xlsx", "/Documents/Reports/Sales.xlsx"],
+          "order": 0
+        },
+        "credentials": {
+          "type": "object",
+          "title": "Authentication",
+          "description": "Credentials for connecting to Microsoft Graph API",
+          "order": 10,
+          "required": ["client_id", "client_secret", "refresh_token"],
+          "properties": {
+            "auth_type": {
+              "type": "string",
+              "const": "Client",
+              "default": "Client"
+            },
+            "tenant_id": {
+              "type": "string",
+              "title": "Tenant ID",
+              "description": "Azure AD Tenant ID",
+              "default": "common"
+            },
+            "client_id": {
+              "type": "string",
+              "title": "Client ID",
+              "description": "The Client ID of your Microsoft Azure application",
+              "airbyte_secret": true
+            },
+            "client_secret": {
+              "type": "string",
+              "title": "Client Secret",
+              "description": "The Client Secret of your Microsoft Azure application",
+              "airbyte_secret": true
+            },
+            "refresh_token": {
+              "type": "string",
+              "title": "Refresh Token",
+              "description": "Refresh token obtained from Microsoft OAuth flow",
+              "airbyte_secret": true
+            }
+          }
+        },
+        "batch_size": {
+          "type": "integer",
+          "title": "Row Batch Size",
+          "description": "Row batch size for each request",
+          "default": 1000000,
+          "order": 20
+        },
+        "names_conversion": {
+          "type": "boolean",
+          "title": "Convert Column Names",
+          "description": "Convert column names to SQL-compliant format",
+          "default": false,
+          "order": 30
+        },
+        "parse_dates": {
+          "type": "boolean",
+          "title": "Parse Excel Date Values",
+          "description": "Convert Excel date serial numbers to readable dates",
+          "default": true,
+          "order": 35
+        }
+      }
+    }
+  }
+}

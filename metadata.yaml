@@ -1,0 +1,33 @@
+data:
+  ab_internal:
+    ql: 100
+    sl: 100
+  connectorBuildOptions:
+    baseImage: docker.io/airbyte/python-connector-base:3.0.0@sha256:98ea29af46dd6e58d00cbcdcbbf5f2e1aade2c85c19b83ad2b59ff91e19eaa05
+  connectorSubtype: file
+  connectorType: source
+  definitionId: 9211b2b4-c159-4605-82ae-0a5173b42517
+  dockerImageTag: 0.1.0
+  dockerRepository: airbyte/source-excel-sheets
+  documentationUrl: https://docs.airbyte.com/integrations/sources/excel-sheets
+  githubIssueLabel: source-excel-sheets
+  icon: icon.svg
+  license: MIT
+  maxSecondsBetweenMessages: 60
+  name: Excel Sheets
+  releaseDate: 2025-01-03
+  registryOverrides:
+    cloud:
+      enabled: true
+    oss:
+      enabled: true
+  releaseStage: alpha
+  remoteRegistries:
+    pypi:
+      enabled: true
+      packageName: airbyte-source-excel-sheets
+  supportLevel: community
+  tags:
+    - language:python
+    - cdk:python
+metadataSpecVersion: "1.0"

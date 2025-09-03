@@ -1,0 +1,9 @@
+{
+  "workbook_path": "/invalid/path.xlsx",
+  "credentials": {
+    "auth_type": "Client",
+    "client_id": "invalid-client-id",
+    "client_secret": "invalid-client-secret",
+    "refresh_token": "invalid-refresh-token"
+  }
+}
