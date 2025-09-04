@@ -44,11 +44,15 @@ class ExcelSheetsClient:
     def _get_access_token(self):
         """Retrieves an access token for Excel/OneDrive access."""
         scope = ["https://graph.microsoft.com/.default"]
-        refresh_token = self.config.credentials.refresh_token
-
-        if refresh_token:
-            result = self.msal_app.acquire_token_by_refresh_token(refresh_token, scopes=scope)
+        
+        if self.config.credentials.auth_type == "Client":
+            refresh_token = self.config.credentials.refresh_token
+            if refresh_token:
+                result = self.msal_app.acquire_token_by_refresh_token(refresh_token, scopes=scope)
+            else:
+                result = self.msal_app.acquire_token_for_client(scopes=scope)
         else:
+            # Service Key authentication - client credentials flow
             result = self.msal_app.acquire_token_for_client(scopes=scope)
 
         if "access_token" not in result:

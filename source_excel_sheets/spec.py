@@ -2,35 +2,70 @@
 # Copyright (c) 2025 Airbyte, Inc., all rights reserved.
 #
 
-from typing import Any, List, Mapping, Optional
+from typing import Any, Dict, List, Literal, Mapping, Optional, Union
 
 from pydantic.v1 import BaseModel, Field, validator
 
 
 class OAuthCredentials(BaseModel):
-    auth_type: str = Field(default="Client", const="Client")
+    """
+    OAuth Credentials for Microsoft Graph API authentication.
+    """
+    class Config:
+        title = "Authenticate via Microsoft (OAuth)"
+
+    auth_type: Literal["Client"] = Field("Client", const=True)
     tenant_id: str = Field(
         default="common",
+        title="Tenant ID",
         description="Azure AD Tenant ID (optional for multi-tenant apps, defaults to 'common')"
     )
     client_id: str = Field(
         ...,
+        title="Client ID",
         description="The Client ID of your Microsoft Azure application",
         airbyte_secret=True,
     )
     client_secret: str = Field(
         ...,
+        title="Client Secret", 
         description="The Client Secret of your Microsoft Azure application",
         airbyte_secret=True,
     )
     refresh_token: str = Field(
         ...,
+        title="Refresh Token",
         description="Refresh token obtained from Microsoft OAuth flow",
         airbyte_secret=True,
     )
 
+
+class ServiceKeyCredentials(BaseModel):
+    """
+    Service Key Authentication (for future use or enterprise scenarios).
+    """
     class Config:
-        schema_extra = {"title": "Authenticate via Microsoft (OAuth)"}
+        title = "Service Key Authentication"
+
+    auth_type: Literal["Service"] = Field("Service", const=True)
+    tenant_id: str = Field(
+        ...,
+        title="Tenant ID",
+        description="Azure AD Tenant ID",
+        airbyte_secret=True,
+    )
+    client_id: str = Field(
+        ...,
+        title="Client ID",
+        description="The Client ID of your Microsoft Azure application",
+        airbyte_secret=True,
+    )
+    client_secret: str = Field(
+        ...,
+        title="Client Secret",
+        description="The Client Secret of your Microsoft Azure application",
+        airbyte_secret=True,
+    )
 
 
 class SourceExcelSheetsSpec(BaseModel):
@@ -59,11 +94,13 @@ class SourceExcelSheetsSpec(BaseModel):
         order=0,
     )
 
-    credentials: OAuthCredentials = Field(
+    credentials: Union[OAuthCredentials, ServiceKeyCredentials] = Field(
         ...,
         title="Authentication",
         description="Credentials for connecting to Microsoft Graph API",
+        discriminator="auth_type",
         order=10,
+        type="object",
     )
 
     batch_size: int = Field(
@@ -109,3 +146,36 @@ class SourceExcelSheetsSpec(BaseModel):
         if not v.startswith("/"):
             v = "/" + v
         return v
+
+    @classmethod
+    def schema(cls, **kwargs) -> Dict[str, Any]:
+        """Override schema to add type: object to credentials field and inline oneOf."""
+        schema = super().schema(**kwargs)
+        
+        # Ensure credentials has type: object
+        if "properties" in schema and "credentials" in schema["properties"]:
+            cred_schema = schema["properties"]["credentials"]
+            cred_schema["type"] = "object"
+            
+            # Replace $ref with inline schemas for oneOf
+            if "oneOf" in cred_schema and "definitions" in schema:
+                new_one_of = []
+                for option in cred_schema["oneOf"]:
+                    if "$ref" in option:
+                        ref_name = option["$ref"].split("/")[-1]
+                        if ref_name in schema["definitions"]:
+                            # Add the schema inline with required properties
+                            inline_schema = {
+                                "type": "object",
+                                "properties": schema["definitions"][ref_name]["properties"],
+                                "required": schema["definitions"][ref_name].get("required", [])
+                            }
+                            # Add title if exists
+                            if "title" in schema["definitions"][ref_name]:
+                                inline_schema["title"] = schema["definitions"][ref_name]["title"]
+                            new_one_of.append(inline_schema)
+                    else:
+                        new_one_of.append(option)
+                cred_schema["oneOf"] = new_one_of
+        
+        return schema
